@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euxo pipefail
           BASE='https://downloads.openwrt.org/releases/25.12.5/targets/mediatek/filogic/'
-          SDK_FILE=$(curl -fsSL "$BASE" | grep -o 'openwrt-sdk-25.12.5-mediatek-filogic_gcc-[^" ]*_musl[^" ]*\.Linux-x86_64\.tar\.[xzst]*' | head -n1)
+          SDK_FILE=$(curl -fsSL "$BASE" | grep -o 'openwrt-sdk-25.12.5-mediatek-filogic_gcc-[^" ]*_musl[^" ]*\.Linux-x86_64\.tar\.[a-z0-9.]*' | head -n1)
           test -n "$SDK_FILE"
           wget -q "${BASE}${SDK_FILE}"
           case "$SDK_FILE" in
@@ -46,12 +46,11 @@ jobs:
           cp -r "$WORKSPACE_DIR/kmod-amneziawg" package/
           cp -r "$WORKSPACE_DIR/amneziawg-tools" package/
           cp -r "$WORKSPACE_DIR/luci-proto-amneziawg" package/
-          cat > .config <<'EOF'
-CONFIG_PACKAGE_kmod-amneziawg=m
-CONFIG_PACKAGE_amneziawg-tools=y
-CONFIG_PACKAGE_luci-proto-amneziawg=y
-CONFIG_PACKAGE_luci-i18n-amneziawg-ru=y
-EOF
+          printf '%s\n' \
+            'CONFIG_PACKAGE_kmod-amneziawg=m' \
+            'CONFIG_PACKAGE_amneziawg-tools=y' \
+            'CONFIG_PACKAGE_luci-proto-amneziawg=y' \
+            'CONFIG_PACKAGE_luci-i18n-amneziawg-ru=y' > .config
           make defconfig
 
       - name: Build packages
